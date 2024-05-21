@@ -30,18 +30,19 @@ class Printer:
 
         Arguments:
             number_of_lines: The number of lines to remove.
-            **kwargs: Additional keyword arguments to pass to the print function.
+            **kwargs: Additional keyword arguments to pass to the print function. "end" is set to "" automatically.
         """
-        self._build_control_sequence("F", number_of_lines)
-        print(self._build_control_sequence("J"), end="", **kwargs)
+        kwargs["end"] = ""
+        print(self._build_control_sequence("F", number_of_lines), **kwargs)
+        print(self._build_control_sequence("J"), **kwargs)
 
     def _draw_frame(self):
         """
         Draw the initial frame.
         """
-        print("\n" * self._number_of_lines)
+        print("\n" * (self._number_of_lines - 1), end="", flush=True)
 
-    def redraw_frame(self, string: str, **kwargs) -> None:
+    def redraw_frame(self, string: str) -> None:
         """
         Print the content to the console, ensuring that it has the correct number of lines.
 
@@ -49,11 +50,7 @@ class Printer:
             *args: The content to print.
             **kwargs: Additional keyword arguments to pass to the print function.
         """
-        if string.count("\n") != self._number_of_lines - 1:
-            raise ValueError(f"Expected {self._number_of_lines} lines, got {string.count('\n') + 1}")
-        print(string, **kwargs)
-
-printer = Printer(3)
-printer.redraw_frame("Line 1\nLine 2\nLine 3")
-sleep(2)
-printer.redraw_frame("UUUUUU\nOOOOOO\nXXXXXX")
+        if (lines_in_string := string.count("\n")) != self._number_of_lines - 1:
+            raise ValueError(f"Expected {self._number_of_lines} lines, got {lines_in_string + 1}")
+        self._remove_n_lines_above(self._number_of_lines - 1, flush=False)
+        print(string, end="", flush=True)
