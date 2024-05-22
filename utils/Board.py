@@ -1,4 +1,3 @@
-import Printer
 from functools import cache
 from enum import Enum
 from random import randint, choices
@@ -53,53 +52,45 @@ class Board:
 
         # We only need to deal with live cells so we must first figure out how many there should be
         number_of_live_cells = randint(int(width * height * 0.1), int(width * height * 0.3))
-        live_cells = frozenset(zip(choices(range(width), k=number_of_live_cells), 
-                        choices(range(height), k=number_of_live_cells)))
+        live_cells = frozenset(Cell(*cell) for cell in zip(choices(range(width), k=number_of_live_cells), 
+            choices(range(height), k=number_of_live_cells)))
+                        
         return Board(width, height, live_cells)
 
-    def print(self) -> None:
-        printer = Printer(self._height)
-        frame = '\n'.join()
+    def __str__(self) -> str:
+        frame = ""
         for y in range(self._height):
-            line = ''
             for x in range(self._width):
                 # End means that we resume from the last printed character
-                line += CellState.ALIVE.value if (x, y) in self._live_cells else CellState.DEAD.value 
-            l
+                frame += CellState.ALIVE.value if Cell(x, y) in self._live_cells else CellState.DEAD.value 
+            frame += "\n"
+        return frame
 
-
-        printer.redraw_frame(frame)
-            line = ''.join(for x in range(self._width))
-            printer.redraw_frame()
-                print(
-                    CellState.ALIVE.value if (x, y) in self._live_cells else CellState.DEAD.value,
-                    end="")
-            # Switch to the next line
-            print()
-
-    @cache
-    def _generate_next_state(self, live_cells: frozenset[tuple[int, int]]):
+    def _generate_next_state(self, live_cells: frozenset[Cell]):
+        assert isinstance(live_cells, frozenset), f"live_cells is not of type frozenset {live_cells}"
+        assert all(isinstance(cell, Cell) for cell in live_cells), f"live_cells contains non-Cell elements {live_cells}"
+ 
         # Count the number of live neighbors
-        def count_live_neighbors(cell: tuple[int, int]) -> int:
-            x, y = cell
+        def count_live_neighbors(cell: Cell) -> int:
+            assert isinstance(cell, Cell), f"cell is not of type Cell. Got '{cell}'"
             count = 0
             for dx, dy in ADJACENT_CELLS:
-                if (x + dx, y + dy) in live_cells:
+                if Cell(cell.x + dx, cell.y + dy) in live_cells:
                     count += 1
             return count
 
         # Compute the next state
         next_live_cells = set()
-        for cell in live_cells:
-            count = count_live_neighbors(cell)
+        for live_cell in live_cells:
+            count = count_live_neighbors(live_cell)
 
             # If the cell is alive and has 2 or 3 live neighbors it stays alive
             if count in (2, 3):
-                next_live_cells.add(cell)
+                next_live_cells.add(live_cell)
 
             # If the cell is dead and has 3 live neighbors it becomes alive
             for dx, dy in ADJACENT_CELLS:
-                neighbor = (cell.x + dx, cell.y + dy)
+                neighbor = Cell(live_cell.x + dx, live_cell.y + dy)
                 if count_live_neighbors(neighbor) == 3 and neighbor not in live_cells:
                     next_live_cells.add(neighbor)
 

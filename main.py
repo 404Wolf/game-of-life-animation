@@ -1,15 +1,15 @@
-from utils import Board
+from utils import Board, Printer
 from sys import stdout
+import time
+
+DELAY = 0.3
 
 def main():
     board = Board.from_random(100, 7)
-    i = 0
-    for live_cell_count in board:
-        print(f"Generation {i}")
-        board.print()
-        i += 1
-        # if i == 2:
-        #     break
+    printer = Printer(str(board))
+    for _ in board:
+        printer.redraw_frame(str(board))
+        time.sleep(DELAY)
 
 if __name__ == "__main__":
     main()

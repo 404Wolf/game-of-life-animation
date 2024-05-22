@@ -8,9 +8,13 @@ class Printer:
         number_of_lines: The number of lines to print and then redraw.
     """
 
-    def __init__(self, number_of_lines: int):
-        self._number_of_lines = number_of_lines
-        self._draw_frame()
+    def __init__(self, initial_frame: str = None, number_of_lines: int = None):
+        if initial_frame:
+            self._number_of_lines = initial_frame.count("\n") + 1
+            self._draw_frame(initial_frame)
+        else:
+            self._number_of_lines = number_of_lines
+            self._draw_frame()
 
     def _build_control_sequence(self, operator: str, modifier: int = None, control_sequence_introducer='\033[') -> str:
         """
@@ -36,10 +40,24 @@ class Printer:
         print(self._build_control_sequence("F", number_of_lines), **kwargs)
         print(self._build_control_sequence("J"), **kwargs)
 
-    def _draw_frame(self):
+    def _validate_frame(self, frame: str) -> None:
+        """
+        Validate that the frame has the correct number of lines.
+
+        Arguments:
+            frame: The frame to validate.
+        """
+        if (newline_count := frame.count("\n")) != self._number_of_lines - 1:
+            raise ValueError(f"Expected {self._number_of_lines} lines, got {newline_count + 1}")
+
+    def _draw_frame(self, frame: str = None):
         """
         Draw the initial frame.
         """
+        if frame is not None:
+            self._validate_frame(frame)
+            print(frame, end="", flush=True)
+            return
         print("\n" * (self._number_of_lines - 1), end="", flush=True)
 
     def redraw_frame(self, string: str) -> None:
@@ -50,7 +68,6 @@ class Printer:
             *args: The content to print.
             **kwargs: Additional keyword arguments to pass to the print function.
         """
-        if (lines_in_string := string.count("\n")) != self._number_of_lines - 1:
-            raise ValueError(f"Expected {self._number_of_lines} lines, got {lines_in_string + 1}")
+        self._validate_frame(string)
         self._remove_n_lines_above(self._number_of_lines - 1, flush=False)
         print(string, end="", flush=True)
