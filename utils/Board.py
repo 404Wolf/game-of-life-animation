@@ -52,9 +52,8 @@ class Board:
 
         # We only need to deal with live cells so we must first figure out how many there should be
         number_of_live_cells = randint(int(width * height * 0.1), int(width * height * 0.5))
-        live_cells = frozenset(Cell(*cell) for cell in zip(choices(range(width), k=number_of_live_cells), 
-            choices(range(height), k=number_of_live_cells)))
-                        
+        live_cells = frozenset(Cell(*cell) for cell in zip(choices(range(width), k=number_of_live_cells),
+                                                           choices(range(height), k=number_of_live_cells)))
         return Board(width, height, live_cells)
 
     def __str__(self) -> str:
@@ -64,12 +63,11 @@ class Board:
                 # End means that we resume from the last printed character
                 frame += CellState.ALIVE.value if Cell(x, y) in self._live_cells else CellState.DEAD.value 
             frame += "\n"
-        return frame
+        return frame[:-1] # don't want the final '\n'
 
     def _generate_next_state(self, live_cells: frozenset[Cell]):
         assert isinstance(live_cells, frozenset), f"live_cells is not of type frozenset {live_cells}"
         assert all(isinstance(cell, Cell) for cell in live_cells), f"live_cells contains non-Cell elements {live_cells}"
- 
         # Count the number of live neighbors
         def count_live_neighbors(cell: Cell) -> int:
             assert isinstance(cell, Cell), f"cell is not of type Cell. Got '{cell}'"
@@ -102,4 +100,3 @@ class Board:
     def __next__(self):
         self._live_cells = self._generate_next_state(self._live_cells)
         return len(self._live_cells)
-    
