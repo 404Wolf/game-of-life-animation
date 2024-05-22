@@ -4,8 +4,8 @@ from random import randint, choices
 from dataclasses import dataclass
 
 class CellState(Enum):
-    DEAD = "◯" # "⠀"
-    ALIVE = "●" # "█"
+    DEAD = "◯" # "⠀" "■"
+    ALIVE = "●" # "█" "□"
 
 # All of the indices of the adjacent cells of a given cell
 ADJACENT_CELLS = ((-1, -1), (-1, 0), (-1, 1),
@@ -51,7 +51,7 @@ class Board:
         assert isinstance(width, int) and isinstance(height, int), f"Width and height must be integers, got {width}, {height}"
 
         # We only need to deal with live cells so we must first figure out how many there should be
-        number_of_live_cells = randint(int(width * height * 0.1), int(width * height * 0.3))
+        number_of_live_cells = randint(int(width * height * 0.1), int(width * height * 0.5))
         live_cells = frozenset(Cell(*cell) for cell in zip(choices(range(width), k=number_of_live_cells), 
             choices(range(height), k=number_of_live_cells)))
                         
