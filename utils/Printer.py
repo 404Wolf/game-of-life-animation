@@ -16,7 +16,7 @@ class Printer:
             self._number_of_lines = number_of_lines
             self._draw_frame()
 
-    def _build_control_sequence(self, operator: str, modifier: int = None, control_sequence_introducer='\033[') -> str:
+    def _build_control_sequence(self, operator: str, modifier: int | str = None, control_sequence_introducer='\033[') -> str:
         """
         Build the control sequence to move the cursor up by the number of lines.
 
@@ -39,6 +39,16 @@ class Printer:
         kwargs["end"] = ""
         print(self._build_control_sequence("F", number_of_lines), **kwargs)
         print(self._build_control_sequence("J"), **kwargs)
+
+    def _move_cursor_to_index(self, row: int = 1, col: int = 1, **kwargs):
+        """
+        Moves cursor to a given index, defaults to (1,1).
+
+        Arguments:
+            **kwargs: Additional keyword arguments to pass to the print function.
+        """
+        kwargs["end"] = ""
+        print(self._build_control_sequence("H", f"{row};{col}"), **kwargs)
 
     def _validate_frame(self, frame: str) -> None:
         """
@@ -69,5 +79,5 @@ class Printer:
             **kwargs: Additional keyword arguments to pass to the print function.
         """
         self._validate_frame(string)
-        self._remove_n_lines_above(self._number_of_lines - 1, flush=False)
+        self._move_cursor_to_index()
         print(string, end="", flush=True)
